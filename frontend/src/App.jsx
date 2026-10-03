@@ -152,63 +152,178 @@ const CareerExplorer = () => {
   );
 };
 
+const LANGUAGES = [
+  { label: 'English', code: 'en-IN' },
+  { label: 'हिंदी (Hindi)', code: 'hi-IN' },
+  { label: 'मराठी (Marathi)', code: 'mr-IN' },
+  { label: 'বাংলা (Bengali)', code: 'bn-IN' },
+  { label: 'தமிழ் (Tamil)', code: 'ta-IN' },
+  { label: 'తెలుగు (Telugu)', code: 'te-IN' },
+  { label: 'ಕನ್ನಡ (Kannada)', code: 'kn-IN' },
+  { label: 'മലയാളം (Malayalam)', code: 'ml-IN' },
+  { label: 'ગુજરાતી (Gujarati)', code: 'gu-IN' },
+  { label: 'ਪੰਜਾਬੀ (Punjabi)', code: 'pa-IN' },
+  { label: 'ଓଡ଼ିଆ (Odia)', code: 'or-IN' },
+];
+
 const AICounselling = () => {
-  const [messages, setMessages] = useState([{text: "Namaste! I am your AI Career Counsellor. I can help you and your family explore careers, understand earnings, or address safety concerns. What would you like to know?", sender: "ai"}]);
+  const [messages, setMessages] = useState([{text: "Namaste! I am Disha, your AI Career Counsellor. I can help you and your family explore careers, understand earnings, or address safety concerns. You can type or use the 🎙️ microphone to speak in your language!", sender: "ai"}]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedLang, setSelectedLang] = useState('en-IN');
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const endOfMessagesRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // --- Text-to-Speech ---
+  const speak = (text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = selectedLang;
+    utter.rate = 0.95;
+    utter.onstart = () => setIsSpeaking(true);
+    utter.onend = () => setIsSpeaking(false);
+    utter.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utter);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis?.cancel();
+    setIsSpeaking(false);
+  };
+
+  // --- Speech-to-Text ---
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = selectedLang;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+    setIsListening(false);
+  };
+
   const sendMessage = async (e) => {
     e.preventDefault();
-    if(!input.trim()) return;
-    
+    if (!input.trim()) return;
+
     const userMsg = input;
     setMessages(prev => [...prev, {text: userMsg, sender: "user"}]);
     setInput('');
     setLoading(true);
-    
+
     try {
       const res = await api.post('/counselling/message', { text: userMsg });
       if (res.data.reply && res.data.reply.includes('AI Error:')) {
-        setMessages(prev => [...prev, {text: "I am currently operating in backup offline mode due to a server connection issue. While I cannot answer complex queries right now, I highly recommend checking out trades like Mechatronics Technician and Solar Panel Installer in our Career Explorer. They offer great salaries and high placement rates!", sender: "ai"}]);
+        const fallback = "I am currently operating in backup offline mode due to a server connection issue. I highly recommend checking out trades like Mechatronics Technician and Solar Panel Installer in our Career Explorer!";
+        setMessages(prev => [...prev, {text: fallback, sender: "ai"}]);
+        if (autoSpeak) speak(fallback);
       } else {
         setMessages(prev => [...prev, {text: res.data.reply, sender: "ai"}]);
+        if (autoSpeak) speak(res.data.reply);
       }
     } catch(err) {
-      setMessages(prev => [...prev, {text: "I am currently operating in backup offline mode due to a server connection issue. While I cannot answer complex queries right now, I highly recommend checking out trades like Mechatronics Technician and Solar Panel Installer in our Career Explorer. They offer great salaries and high placement rates!", sender: "ai"}]);
+      const fallback = "I am currently in offline mode. Please try again in a moment. Meanwhile, explore our Career Explorer for verified trade data!";
+      setMessages(prev => [...prev, {text: fallback, sender: "ai"}]);
+      if (autoSpeak) speak(fallback);
     } finally {
       setLoading(false);
     }
   };
 
+  const currentLangLabel = LANGUAGES.find(l => l.code === selectedLang)?.label || 'English';
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-64px)] flex flex-col">
-      <div className="mb-4">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 h-[calc(100vh-64px)] flex flex-col">
+      {/* Back */}
+      <div className="mb-3">
         <Link to="/" className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800"><ArrowLeft className="w-4 h-4 mr-1"/> Back</Link>
       </div>
-      <div className="bg-white border border-gray-200 rounded-t-xl p-4 shadow-sm flex items-center justify-between">
+
+      {/* Header */}
+      <div className="bg-white border border-gray-200 rounded-t-xl p-3 shadow-sm flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
-          <div className="bg-indigo-100 p-2 rounded-full"><Bot className="w-6 h-6 text-indigo-700"/></div>
+          <div className="bg-indigo-100 p-2 rounded-full"><Bot className="w-5 h-5 text-indigo-700"/></div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">AI Career Counsellor</h2>
-            <p className="text-xs text-green-600 font-medium flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Online | Evidence-based guidance</p>
+            <h2 className="text-base font-bold text-gray-900">Disha — AI Career Counsellor</h2>
+            <p className="text-xs text-green-600 font-medium flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Online | Multilingual</p>
           </div>
         </div>
-        <button className="text-sm border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50 text-gray-700 font-medium transition-colors">
-          Switch to Hindi
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Auto-speak toggle */}
+          <button
+            onClick={() => setAutoSpeak(v => !v)}
+            title={autoSpeak ? "Auto-speak ON" : "Auto-speak OFF"}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${autoSpeak ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
+          >
+            🔊 {autoSpeak ? 'Speaker ON' : 'Speaker OFF'}
+          </button>
+
+          {/* Language selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowLangMenu(v => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            >
+              🌐 {currentLangLabel.split(' ')[0]}
+            </button>
+            {showLangMenu && (
+              <div className="absolute right-0 top-9 z-50 bg-white border border-gray-200 rounded-xl shadow-xl w-52 max-h-72 overflow-y-auto">
+                {LANGUAGES.map(lang => (
+                  <button
+                    key={lang.code}
+                    onClick={() => { setSelectedLang(lang.code); setShowLangMenu(false); }}
+                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-indigo-50 transition-colors ${selectedLang === lang.code ? 'text-indigo-700 font-semibold bg-indigo-50' : 'text-gray-700'}`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      
-      <div className="flex-1 bg-gray-50 border-x border-gray-200 overflow-y-auto p-6 space-y-6">
+
+      {/* Messages */}
+      <div className="flex-1 bg-gray-50 border-x border-gray-200 overflow-y-auto p-4 space-y-4">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
             {m.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 flex-shrink-0 mt-1"><Bot className="w-4 h-4 text-white"/></div>}
-            <div className={`max-w-[80%] rounded-2xl p-4 shadow-sm ${m.sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'}`}>
-              <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{m.text}</p>
+            <div className={`max-w-[80%] rounded-2xl p-3 shadow-sm ${m.sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'}`}>
+              <p className="text-[14px] leading-relaxed whitespace-pre-wrap">{m.text}</p>
+              {m.sender === 'ai' && (
+                <button
+                  onClick={() => isSpeaking ? stopSpeaking() : speak(m.text)}
+                  className="mt-2 text-xs text-indigo-500 hover:text-indigo-700 flex items-center gap-1"
+                >
+                  {isSpeaking ? '⏹ Stop' : '🔊 Listen'}
+                </button>
+              )}
             </div>
             {m.sender === 'user' && <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center ml-2 flex-shrink-0 mt-1"><User className="w-4 h-4 text-gray-600"/></div>}
           </div>
@@ -225,29 +340,42 @@ const AICounselling = () => {
         )}
         <div ref={endOfMessagesRef} />
       </div>
-      
-      <div className="bg-white border border-gray-200 rounded-b-xl p-4 shadow-sm">
-        <form onSubmit={sendMessage} className="flex gap-3">
-          <input 
-            type="text" 
-            value={input} 
-            onChange={e => setInput(e.target.value)} 
-            disabled={loading}
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow" 
-            placeholder="E.g. Is the Fitter trade safe? What is the salary?" 
+
+      {/* Input bar */}
+      <div className="bg-white border border-gray-200 rounded-b-xl p-3 shadow-sm">
+        <form onSubmit={sendMessage} className="flex gap-2 items-center">
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            disabled={loading || isListening}
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-sm"
+            placeholder={isListening ? `Listening in ${currentLangLabel.split(' ')[0]}...` : "Type or speak your question..."}
           />
-          <button 
-            type="submit" 
-            disabled={loading || !input.trim()}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
+          {/* Mic button */}
+          <button
+            type="button"
+            onClick={isListening ? stopListening : startListening}
+            title={isListening ? "Stop listening" : `Speak in ${currentLangLabel}`}
+            className={`p-2.5 rounded-lg transition-all flex-shrink-0 ${isListening ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
           >
-            Send <Send className="w-4 h-4"/>
+            🎙️
+          </button>
+          {/* Send button */}
+          <button
+            type="submit"
+            disabled={loading || !input.trim()}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 text-sm flex-shrink-0"
+          >
+            <Send className="w-4 h-4"/>
           </button>
         </form>
+        <p className="text-xs text-gray-400 mt-1.5 text-center">🌐 Mic language: <strong>{currentLangLabel}</strong> · Change via the language button above</p>
       </div>
     </div>
   );
 };
+
 
 const FamilyDecision = () => {
   const [activeTab, setActiveTab] = useState('safety');
