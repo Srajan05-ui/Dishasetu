@@ -178,9 +178,9 @@ const AICounselling = () => {
       
       <div className="flex-1 bg-gray-50 border-x border-gray-200 overflow-y-auto p-6 space-y-6">
         {messages.map((m, i) => (
-          <div key={i} className={lex }>
+          <div key={i} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
             {m.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 flex-shrink-0 mt-1"><Bot className="w-4 h-4 text-white"/></div>}
-            <div className={max-w-[80%] rounded-2xl p-4 shadow-sm }>
+            <div className={`max-w-[80%] rounded-2xl p-4 shadow-sm ${m.sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'}`}>
               <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{m.text}</p>
             </div>
             {m.sender === 'user' && <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center ml-2 flex-shrink-0 mt-1"><User className="w-4 h-4 text-gray-600"/></div>}
