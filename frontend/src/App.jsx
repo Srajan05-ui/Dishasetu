@@ -480,7 +480,7 @@ const FamilyDecision = () => {
   const recognitionRef = useRef(null);
 
   const scrollToBottom = () => endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
-  useEffect(() => scrollToBottom(), [messages]);
+  useEffect(() => { scrollToBottom(); }, [messages]);
 
   // --- Text-to-Speech ---
   const speak = (text) => {
