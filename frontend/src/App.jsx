@@ -235,6 +235,8 @@ const CareerExplorer = () => {
 
 
 
+
+
 const LANGUAGES = [
   { label: 'English', code: 'en-IN' },
   { label: 'हिंदी (Hindi)', code: 'hi-IN' },
