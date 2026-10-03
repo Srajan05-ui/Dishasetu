@@ -70,87 +70,168 @@ const Landing = () => (
   </div>
 );
 
+const MOCK_CAREERS = [
+  { id: 1, name: "Electrician", sector: "Power", nsqf_level: 4, placement_rate: 85, salary_range: "₹18,000 - ₹25,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "Electricians install, maintain, and repair electrical systems in homes, commercial buildings, and industrial facilities.", skills: ["Wiring & Circuits","Safety Protocols","Panel Installation","Fault Diagnosis","Motor Winding"], job_roles: ["Industrial Electrician","Residential Electrician","Solar Technician","Panel Operator"], career_progression: "Apprentice → Journeyman → Master Electrician → Electrical Contractor", safety_info: "Work involves standard electrical safety gear. Modern sites strictly follow IS:732 standards. Low risk with proper PPE.", higher_education: "B.Tech Electrical Engineering via lateral entry after diploma" },
+  { id: 2, name: "Fitter", sector: "Manufacturing", nsqf_level: 4, placement_rate: 82, salary_range: "₹16,000 - ₹22,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "Fitters assemble, install, and maintain mechanical parts and machinery in manufacturing plants.", skills: ["Precision Measurement","Lathe Operation","Blueprint Reading","CNC Basics","Hydraulics"], job_roles: ["Production Fitter","Maintenance Fitter","Tool Room Fitter","CNC Operator"], career_progression: "Fitter → Senior Fitter → Supervisor → Production Manager", safety_info: "Clean, structured factory environment. Safety helmets and gloves required. Covered by Factories Act 1948.", higher_education: "Diploma in Mechanical Engineering via NCVT certification" },
+  { id: 3, name: "Welder", sector: "Manufacturing", nsqf_level: 3, placement_rate: 78, salary_range: "₹15,000 - ₹20,000", verification_status: "VERIFIED", duration: "1 Year", min_qualification: "Class 8", description: "Welders join metal parts using heat and specialized equipment in construction, automotive, and shipbuilding industries.", skills: ["MIG/TIG Welding","Arc Welding","Safety Practices","Metal Cutting","Blueprint Reading"], job_roles: ["Structural Welder","Pipeline Welder","Automotive Welder","Fabricator"], career_progression: "Helper → Welder → Senior Welder → Welding Inspector → Supervisor", safety_info: "Proper PPE (mask, gloves, apron) is mandatory and provided. Well-ventilated modern workshops minimize fume exposure.", higher_education: "Diploma in Welding Technology or Fabrication Engineering" },
+  { id: 4, name: "Mechatronics Technician", sector: "Automotive", nsqf_level: 5, placement_rate: 92, salary_range: "₹25,000 - ₹35,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "Mechatronics technicians integrate mechanical, electronic, and computer systems to maintain automated machinery and robots.", skills: ["PLC Programming","Robotics","Sensors & Actuators","CAD Basics","Troubleshooting"], job_roles: ["Automation Technician","Robotics Operator","Production Engineer","CNC Programmer"], career_progression: "Technician → Senior Technician → Team Lead → Automation Engineer", safety_info: "Modern, climate-controlled facilities. Industry 4.0 workplaces have highest safety standards globally.", higher_education: "B.Tech Mechatronics or Robotics via lateral entry" },
+  { id: 5, name: "Solar Panel Installer", sector: "Renewable Energy", nsqf_level: 4, placement_rate: 88, salary_range: "₹20,000 - ₹28,000", verification_status: "VERIFIED", duration: "6 Months", min_qualification: "Class 8", description: "Solar technicians install, inspect, and maintain photovoltaic systems on rooftops and solar farms.", skills: ["PV Panel Installation","Electrical Wiring","Inverter Setup","Safety at Height","Net Metering"], job_roles: ["Solar Installer","O&M Technician","Solar Auditor","Project Supervisor"], career_progression: "Helper → Installer → O&M Technician → Site Supervisor → Project Manager", safety_info: "Height safety training is mandatory. Harnesses and helmets required. Outdoor work with flexible hours.", higher_education: "Diploma in Renewable Energy Technology" },
+  { id: 6, name: "Plumber", sector: "Construction", nsqf_level: 4, placement_rate: 80, salary_range: "₹16,000 - ₹24,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "Plumbers install and repair water supply, drainage, and sanitation systems in residential and commercial buildings.", skills: ["Pipe Fitting","Drainage Systems","Sanitation","Water Heating","Blueprint Reading"], job_roles: ["Residential Plumber","Industrial Plumber","Sanitation Engineer","Water Treatment Operator"], career_progression: "Helper → Plumber → Master Plumber → Plumbing Contractor", safety_info: "Standard PPE required. Modern plumbing uses safe, non-toxic materials. Good work-life balance.", higher_education: "Diploma in Civil Engineering (Sanitation)" },
+  { id: 7, name: "COPA (Computer Operator)", sector: "IT & Computing", nsqf_level: 4, placement_rate: 87, salary_range: "₹14,000 - ₹22,000", verification_status: "VERIFIED", duration: "1 Year", min_qualification: "Class 10", description: "COPA professionals handle data entry, office software, programming basics, and computer maintenance.", skills: ["MS Office","Tally ERP","Basic Programming","Hardware Maintenance","Internet & Networking"], job_roles: ["Data Entry Operator","Office Assistant","Computer Lab Instructor","IT Support"], career_progression: "Operator → Senior Operator → IT Assistant → IT Manager", safety_info: "100% indoor, air-conditioned office environment. One of the safest trade options available.", higher_education: "BCA or B.Sc. Computer Science via lateral entry" },
+  { id: 8, name: "Draughtsman Civil", sector: "Construction", nsqf_level: 5, placement_rate: 83, salary_range: "₹18,000 - ₹30,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "Civil draughtsmen prepare technical drawings and plans for buildings, roads, bridges, and infrastructure using CAD.", skills: ["AutoCAD","Civil Engineering Drawing","Structural Plans","Site Survey","BIM Basics"], job_roles: ["CAD Draftsman","Site Engineer Assistant","Estimation Engineer","BIM Modeller"], career_progression: "Junior Draftsman → Senior Draftsman → Design Engineer → Project Engineer", safety_info: "Office-based, completely safe environment. Uses industry-standard software tools.", higher_education: "Diploma/B.Tech in Civil Engineering via lateral entry" },
+  { id: 9, name: "Refrigeration & AC Mechanic", sector: "HVAC", nsqf_level: 4, placement_rate: 89, salary_range: "₹20,000 - ₹32,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "RAC mechanics install, service, and repair air conditioners, refrigerators, and industrial cooling systems.", skills: ["Refrigerant Handling","Compressor Servicing","Electrical Wiring","HVAC Ducting","Inverter AC"], job_roles: ["AC Technician","HVAC Engineer","Refrigeration Mechanic","Cold Storage Supervisor"], career_progression: "Helper → Technician → Senior Technician → HVAC Supervisor → Contractor", safety_info: "Indoor work, safe refrigerants (R-32, R-410A) widely used. High demand sector, especially in summer.", higher_education: "Diploma in HVAC & Refrigeration Technology" },
+  { id: 10, name: "Turner", sector: "Manufacturing", nsqf_level: 4, placement_rate: 79, salary_range: "₹16,000 - ₹24,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "Turners operate lathes and precision machining equipment to create metal components with exact specifications.", skills: ["Lathe Operation","CNC Turning","Precision Measurement","Tool Setting","Quality Control"], job_roles: ["Lathe Operator","CNC Turner","Tool Maker","Quality Inspector"], career_progression: "Helper → Turner → CNC Operator → Senior Machinist → Production Supervisor", safety_info: "Structured factory setting with safety guards on all machines. Ear protection and gloves provided.", higher_education: "Diploma in Mechanical Engineering or Production Technology" },
+  { id: 11, name: "Carpenter", sector: "Construction", nsqf_level: 3, placement_rate: 76, salary_range: "₹15,000 - ₹22,000", verification_status: "VERIFIED", duration: "1 Year", min_qualification: "Class 8", description: "Carpenters construct, install, and repair structures and fixtures made of wood, plywood, and similar materials.", skills: ["Wood Joinery","Furniture Making","Blueprint Reading","Power Tools","Interior Fitting"], job_roles: ["Furniture Carpenter","Construction Carpenter","Interior Fitter","Cabinet Maker"], career_progression: "Helper → Carpenter → Master Carpenter → Contractor → Furniture Entrepreneur", safety_info: "Modern workshops have dust extraction and machine guards. Safety goggles and gloves mandatory.", higher_education: "Diploma in Interior Design or Wood Technology" },
+  { id: 12, name: "Health Sanitary Inspector", sector: "Healthcare", nsqf_level: 4, placement_rate: 91, salary_range: "₹22,000 - ₹35,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "Health sanitary inspectors ensure public health and hygiene standards in communities, hospitals, and food establishments.", skills: ["Disease Prevention","Food Safety Inspection","Sanitation Standards","Record Keeping","Community Health"], job_roles: ["Sanitary Inspector","Public Health Worker","Food Safety Officer","Hospital Hygiene Supervisor"], career_progression: "Sanitary Inspector → Senior Inspector → Health Supervisor → Public Health Officer", safety_info: "Government-regulated, structured job. Highly respected community service role with job security.", higher_education: "B.Sc. Public Health or Environmental Health" },
+  { id: 13, name: "Electronics Mechanic", sector: "Electronics", nsqf_level: 4, placement_rate: 84, salary_range: "₹17,000 - ₹26,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "Electronics mechanics repair and maintain consumer electronics, medical equipment, and industrial electronic devices.", skills: ["Circuit Diagnosis","Soldering","PCB Repair","Oscilloscope","Microcontroller Basics"], job_roles: ["Electronics Technician","Service Engineer","PCB Repair Expert","Medical Equipment Technician"], career_progression: "Technician → Senior Technician → Service Manager → Electronics Entrepreneur", safety_info: "Clean, climate-controlled workshop environment. ESD safety protocols followed. Very safe trade.", higher_education: "B.Tech in Electronics & Communication" },
+  { id: 14, name: "Surveyor", sector: "Construction", nsqf_level: 5, placement_rate: 86, salary_range: "₹20,000 - ₹32,000", verification_status: "VERIFIED", duration: "2 Years", min_qualification: "Class 10", description: "Surveyors measure land boundaries and topography using advanced instruments for construction and urban planning.", skills: ["Total Station","GPS/GIS","AutoCAD","Land Measurement","Map Reading"], job_roles: ["Land Surveyor","GIS Analyst","Civil Survey Assistant","Urban Planner Assistant"], career_progression: "Junior Surveyor → Licensed Surveyor → Senior Surveyor → Project Lead", safety_info: "Outdoor fieldwork with structured safety protocols. High-demand profession for Smart City projects.", higher_education: "Diploma/B.Tech in Civil Engineering or Geomatics" },
+  { id: 15, name: "Stenographer", sector: "Office & Administration", nsqf_level: 4, placement_rate: 81, salary_range: "₹18,000 - ₹28,000", verification_status: "VERIFIED", duration: "1 Year", min_qualification: "Class 10", description: "Stenographers record and transcribe spoken communications at high speed, working in courts, offices, and government departments.", skills: ["Shorthand Writing","MS Office","Typing Speed (80+ WPM)","Office Management","Communication"], job_roles: ["Court Stenographer","Personal Secretary","Transcriptionist","Government Clerk"], career_progression: "Stenographer → Senior Stenographer → Personal Assistant → Office Superintendent", safety_info: "100% office-based, government jobs available. Permanent employment with pension benefits.", higher_education: "B.A. in Office Management or Secretarial Practice" },
+];
+
+const CareerDetail = ({ career, onClose }) => (
+  <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-8" onClick={onClose}>
+    <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-auto" onClick={e => e.stopPropagation()}>
+      <div className="bg-indigo-600 rounded-t-2xl p-6 text-white">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs bg-white/20 px-2 py-1 rounded-full">{career.sector}</span>
+          <button onClick={onClose} className="text-white/70 hover:text-white text-2xl leading-none">×</button>
+        </div>
+        <h2 className="text-2xl font-extrabold">{career.name}</h2>
+        <p className="text-indigo-200 text-sm mt-1">NSQF Level {career.nsqf_level} · {career.duration || '2 Years'} · Min: {career.min_qualification || 'Class 10'}</p>
+      </div>
+      <div className="p-6 space-y-5">
+        <p className="text-gray-600 leading-relaxed">{career.description || 'A skilled vocational trade with excellent career prospects.'}</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+            <p className="text-2xl font-extrabold text-green-700">{career.placement_rate}%</p>
+            <p className="text-xs text-green-600 font-medium mt-1">Placement Rate</p>
+          </div>
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-center">
+            <p className="text-base font-extrabold text-indigo-700">{career.salary_range}</p>
+            <p className="text-xs text-indigo-600 font-medium mt-1">Monthly Salary (Est.)</p>
+          </div>
+        </div>
+        {career.skills && (
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">🛠 Key Skills</h4>
+            <div className="flex flex-wrap gap-2">{career.skills.map(s => <span key={s} className="bg-indigo-50 text-indigo-700 text-xs px-3 py-1 rounded-full border border-indigo-100">{s}</span>)}</div>
+          </div>
+        )}
+        {career.job_roles && (
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">💼 Job Roles</h4>
+            <div className="flex flex-wrap gap-2">{career.job_roles.map(r => <span key={r} className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">{r}</span>)}</div>
+          </div>
+        )}
+        {career.career_progression && (
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <h4 className="font-semibold text-blue-900 mb-1">📈 Career Progression</h4>
+            <p className="text-sm text-blue-800">{career.career_progression}</p>
+          </div>
+        )}
+        {career.safety_info && (
+          <div className="bg-green-50 border border-green-100 rounded-xl p-4">
+            <h4 className="font-semibold text-green-900 mb-1 flex items-center gap-1"><ShieldCheck className="w-4 h-4"/> Safety & Environment</h4>
+            <p className="text-sm text-green-800">{career.safety_info}</p>
+          </div>
+        )}
+        {career.higher_education && (
+          <div className="bg-purple-50 border border-purple-100 rounded-xl p-4">
+            <h4 className="font-semibold text-purple-900 mb-1 flex items-center gap-1"><GraduationCap className="w-4 h-4"/> Higher Education Path</h4>
+            <p className="text-sm text-purple-800">{career.higher_education}</p>
+          </div>
+        )}
+        <Link to="/counselling" onClick={onClose} className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition-colors">
+          Ask Disha AI about this trade 🤖
+        </Link>
+      </div>
+    </div>
+  </div>
+);
+
 const CareerExplorer = () => {
   const [careers, setCareers] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  const mockCareers = [
-    { id: 1, name: "Electrician", sector: "Power", nsqf_level: 4, placement_rate: 85, salary_range: "₹18,000 - ₹25,000", verification_status: "VERIFIED" },
-    { id: 2, name: "Fitter", sector: "Manufacturing", nsqf_level: 4, placement_rate: 82, salary_range: "₹16,000 - ₹22,000", verification_status: "VERIFIED" },
-    { id: 3, name: "Welder", sector: "Manufacturing", nsqf_level: 3, placement_rate: 78, salary_range: "₹15,000 - ₹20,000", verification_status: "VERIFIED" },
-    { id: 4, name: "Mechatronics Technician", sector: "Automotive", nsqf_level: 5, placement_rate: 92, salary_range: "₹25,000 - ₹35,000", verification_status: "VERIFIED" },
-    { id: 5, name: "Solar Panel Installer", sector: "Renewable Energy", nsqf_level: 4, placement_rate: 88, salary_range: "₹20,000 - ₹28,000", verification_status: "VERIFIED" }
-  ];
+  const [selected, setSelected] = useState(null);
+  const [search, setSearch] = useState('');
+  const [sectorFilter, setSectorFilter] = useState('All');
 
   useEffect(() => {
     api.get('/careers')
-      .then(res => { 
-        if(res.data && res.data.length > 0) {
-          setCareers(res.data);
-        } else {
-          setCareers(mockCareers);
-        }
-        setLoading(false); 
+      .then(res => {
+        if(res.data && res.data.length > 0) setCareers(res.data);
+        else setCareers(MOCK_CAREERS);
+        setLoading(false);
       })
-      .catch(err => { 
-        console.error(err); 
-        setCareers(mockCareers);
-        setLoading(false); 
-      });
+      .catch(() => { setCareers(MOCK_CAREERS); setLoading(false); });
   }, []);
+
+  const sectors = ['All', ...new Set(careers.map(c => c.sector))];
+  const filtered = careers.filter(c => {
+    const matchSector = sectorFilter === 'All' || c.sector === sectorFilter;
+    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.sector.toLowerCase().includes(search.toLowerCase());
+    return matchSector && matchSearch;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {selected && <CareerDetail career={selected} onClose={() => setSelected(null)} />}
       <div className="mb-8">
         <Link to="/" className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 mb-4"><ArrowLeft className="w-4 h-4 mr-1"/> Back</Link>
         <h2 className="text-3xl font-extrabold text-gray-900">Career Explorer</h2>
-        <p className="mt-2 text-lg text-gray-600">Discover and compare vocational trades based on verified outcomes.</p>
+        <p className="mt-2 text-lg text-gray-600">Discover and compare {careers.length} vocational trades based on verified outcomes.</p>
       </div>
-      
+
+      <div className="flex flex-col sm:flex-row gap-3 mb-8">
+        <input type="text" placeholder="Search trades..." value={search} onChange={e => setSearch(e.target.value)}
+          className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <div className="flex gap-2 flex-wrap">
+          {sectors.map(s => (
+            <button key={s} onClick={() => setSectorFilter(s)}
+              className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${sectorFilter === s ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>{s}</button>
+          ))}
+        </div>
+      </div>
+
       {loading ? (
         <div className="text-center py-20"><div className="animate-pulse flex flex-col items-center"><div className="h-12 w-12 bg-indigo-200 rounded-full mb-4"></div><p className="text-gray-500 font-medium">Loading trades...</p></div></div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {careers.map(c => (
+          {filtered.map(c => (
             <div key={c.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow overflow-hidden flex flex-col">
               <div className="p-6 flex-1">
                 <div className="flex justify-between items-start mb-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">{c.sector}</span>
                   {c.verification_status === 'VERIFIED' ? (
-                     <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded border border-green-200"><ShieldCheck className="w-3 h-3"/> Verified</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded border border-green-200"><ShieldCheck className="w-3 h-3"/> Verified</span>
                   ) : (
-                     <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200"><AlertTriangle className="w-3 h-3"/> {c.verification_status}</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200"><AlertTriangle className="w-3 h-3"/> {c.verification_status}</span>
                   )}
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{c.name}</h3>
-                
                 <div className="space-y-3 mt-4">
-                  <div className="flex items-center text-sm text-gray-600 gap-2">
-                    <Briefcase className="w-4 h-4 text-gray-400" />
-                    <span>NSQF Level {c.nsqf_level}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600 gap-2">
-                    <BarChart className="w-4 h-4 text-gray-400" />
-                    <span>Placement: <strong className="text-gray-900">{c.placement_rate}%</strong></span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600 gap-2">
-                    <BookOpen className="w-4 h-4 text-gray-400" />
-                    <span>Est. {c.salary_range}</span>
-                  </div>
+                  <div className="flex items-center text-sm text-gray-600 gap-2"><Briefcase className="w-4 h-4 text-gray-400" /><span>NSQF Level {c.nsqf_level}</span></div>
+                  <div className="flex items-center text-sm text-gray-600 gap-2"><BarChart className="w-4 h-4 text-gray-400" /><span>Placement: <strong className="text-gray-900">{c.placement_rate}%</strong></span></div>
+                  <div className="flex items-center text-sm text-gray-600 gap-2"><BookOpen className="w-4 h-4 text-gray-400" /><span>Est. {c.salary_range}</span></div>
                 </div>
               </div>
               <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
-                <button className="w-full text-indigo-600 font-semibold text-sm hover:text-indigo-800 flex justify-between items-center">
+                <button onClick={() => setSelected(c)} className="w-full text-indigo-600 font-semibold text-sm hover:text-indigo-800 flex justify-between items-center">
                   View Full Details <ChevronRight className="w-4 h-4"/>
                 </button>
               </div>
             </div>
           ))}
+          {filtered.length === 0 && (
+            <div className="col-span-3 text-center py-16 text-gray-400">No trades found for "{search}". Try a different search or filter.</div>
+          )}
         </div>
       )}
     </div>
   );
 };
+
+
 
 const LANGUAGES = [
   { label: 'English', code: 'en-IN' },
