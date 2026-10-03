@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import { BookOpen, Users, BarChart, ShieldCheck, MapPin, Briefcase, GraduationCap, ChevronRight, Send, User, Bot, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 
-const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api' });
+const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL || 'https://dishasetu-backend.onrender.com/api' });
 
 // --- UI COMPONENTS ---
 const Navbar = () => {
@@ -222,6 +222,63 @@ const AICounselling = () => {
   );
 };
 
+const FamilyDecision = () => {
+  const [activeTab, setActiveTab] = useState('safety');
+  
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-extrabold text-gray-900">Family Decision Room</h2>
+        <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">We understand that choosing a career is a family decision. Explore verified data to address common concerns about vocational trades.</p>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="flex border-b border-gray-200">
+          <button onClick={() => setActiveTab('safety')} className={`flex-1 py-4 px-6 text-center font-medium text-sm ${activeTab === 'safety' ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}>Safety & Environment</button>
+          <button onClick={() => setActiveTab('earnings')} className={`flex-1 py-4 px-6 text-center font-medium text-sm ${activeTab === 'earnings' ? 'bg-green-50 text-green-700 border-b-2 border-green-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}>Earnings & Growth</button>
+          <button onClick={() => setActiveTab('perception')} className={`flex-1 py-4 px-6 text-center font-medium text-sm ${activeTab === 'perception' ? 'bg-purple-50 text-purple-700 border-b-2 border-purple-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}>Social Perception</button>
+        </div>
+        
+        <div className="p-8">
+          {activeTab === 'safety' && (
+            <div className="space-y-6">
+              <div className="flex gap-4">
+                <div className="bg-blue-100 p-3 rounded-full h-fit"><ShieldCheck className="w-6 h-6 text-blue-700" /></div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Are vocational jobs safe?</h3>
+                  <p className="text-gray-600 leading-relaxed">Modern manufacturing and technical roles strictly follow national safety protocols (e.g., OSHA standards). Facilities are equipped with advanced safety gear, automated machinery, and continuous monitoring. Many trades now involve operating computers and robotic systems rather than manual heavy lifting.</p>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeTab === 'earnings' && (
+            <div className="space-y-6">
+              <div className="flex gap-4">
+                <div className="bg-green-100 p-3 rounded-full h-fit"><BarChart className="w-6 h-6 text-green-700" /></div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Can my child earn a good living?</h3>
+                  <p className="text-gray-600 leading-relaxed">Yes. Skilled trades often offer starting salaries comparable to or higher than entry-level corporate jobs, with the added benefit of entering the workforce earlier without massive student debt. Experienced professionals in fields like mechatronics and advanced welding often earn premium wages.</p>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeTab === 'perception' && (
+            <div className="space-y-6">
+              <div className="flex gap-4">
+                <div className="bg-purple-100 p-3 rounded-full h-fit"><Users className="w-6 h-6 text-purple-700" /></div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Is this a respected career path?</h3>
+                  <p className="text-gray-600 leading-relaxed">Vocational careers are the backbone of modern infrastructure. Today’s tradespeople are highly skilled technologists, engineers, and specialists. The stigma of "blue-collar" work is rapidly fading as these roles become increasingly high-tech, essential, and highly respected in society.</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   return (
     <BrowserRouter>
@@ -232,7 +289,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/careers" element={<CareerExplorer />} />
             <Route path="/counselling" element={<AICounselling />} />
-            <Route path="/family-decision" element={<div className="p-8 text-center text-xl text-gray-500">Family Decision Room coming soon...</div>} />
+            <Route path="/family-decision" element={<FamilyDecision />} />
           </Routes>
         </main>
       </div>
