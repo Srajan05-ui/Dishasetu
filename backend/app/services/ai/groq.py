@@ -6,7 +6,7 @@ class GroqProvider(AIProvider):
     def __init__(self):
         self.api_key = settings.GROQ_API_KEY.strip() if settings.GROQ_API_KEY else ""
         self.url = 'https://api.groq.com/openai/v1/chat/completions'
-        self.model = 'llama3-8b-8192'  # stable, confirmed available on Groq free tier
+        self.model = 'openai/gpt-oss-20b'  # confirmed working on this key
 
     def generate_response(self, prompt: str) -> str:
         if not self.api_key:
@@ -35,7 +35,9 @@ class GroqProvider(AIProvider):
         if not response.is_success:
             raise Exception(f'Groq API error {response.status_code}: {response.text[:200]}')
         data = response.json()
-        return data['choices'][0]['message']['content']
+        msg = data['choices'][0]['message']
+        # Some reasoning models return empty content with reasoning field
+        return msg.get('content') or msg.get('reasoning', '') or 'No response generated.'
 
     def generate_response_with_system(self, prompt: str, system: str) -> str:
         if not self.api_key:
@@ -51,4 +53,6 @@ class GroqProvider(AIProvider):
         if not response.is_success:
             raise Exception(f'Groq API error {response.status_code}: {response.text[:200]}')
         data = response.json()
-        return data['choices'][0]['message']['content']
+        msg = data['choices'][0]['message']
+        # Some reasoning models return empty content with reasoning field
+        return msg.get('content') or msg.get('reasoning', '') or 'No response generated.'

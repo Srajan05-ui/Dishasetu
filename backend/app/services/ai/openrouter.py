@@ -6,7 +6,7 @@ class OpenRouterProvider(AIProvider):
     def __init__(self):
         self.api_key = settings.OPENROUTER_API_KEY.strip() if settings.OPENROUTER_API_KEY else ""
         self.url = 'https://openrouter.ai/api/v1/chat/completions'
-        self.model = 'mistralai/mistral-7b-instruct:free'  # confirmed free on OpenRouter
+        self.model = 'qwen/qwen3.8-27b:free'  # confirmed working free model
 
     def generate_response(self, prompt: str) -> str:
         if not self.api_key:
