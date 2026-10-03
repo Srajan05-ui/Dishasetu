@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from app.services.ai import get_ai_provider
+from app.services.ai import FallbackProvider
 
 router = APIRouter()
 
@@ -9,6 +9,6 @@ class Message(BaseModel):
 
 @router.post('/message')
 def send_message(msg: Message):
-    provider = get_ai_provider()
+    provider = FallbackProvider()
     response = provider.generate_response(msg.text)
     return {'reply': response}
