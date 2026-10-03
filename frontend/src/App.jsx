@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { BookOpen, Users, BarChart, ShieldCheck, MapPin, Briefcase, GraduationCap, ChevronRight, Send, User, Bot, AlertTriangle, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL || 'https://dishasetu-backend.onrender.com/api' });
 
@@ -396,7 +398,9 @@ const AICounselling = () => {
           <div key={i} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
             {m.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 flex-shrink-0 mt-1"><Bot className="w-4 h-4 text-white"/></div>}
             <div className={`max-w-[80%] rounded-2xl p-3 shadow-sm ${m.sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'}`}>
-              <p className="text-[14px] leading-relaxed whitespace-pre-wrap">{m.text}</p>
+              <div className="text-[14px] leading-relaxed prose prose-sm prose-indigo max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+              </div>
               {m.sender === 'ai' && (
                 <button
                   onClick={() => isSpeaking ? stopSpeaking() : speak(m.text)}
@@ -460,13 +464,70 @@ const AICounselling = () => {
 
 const FamilyDecision = () => {
   const [activeTab, setActiveTab] = useState('safety');
-  const [messages, setMessages] = useState([{ text: "Namaste. I am Disha AI. Please ask any questions or concerns you have as a parent regarding your child's vocational career.", sender: "ai" }]);
+  const [messages, setMessages] = useState([{ text: "Namaste. I am Disha AI. Please ask any questions or concerns you have as a parent regarding your child's vocational career. You can also use the microphone to speak.", sender: "ai" }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedLang, setSelectedLang] = useState('en-IN');
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const endOfMessagesRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const scrollToBottom = () => endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   useEffect(() => scrollToBottom(), [messages]);
+
+  // --- Text-to-Speech ---
+  const speak = (text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = selectedLang;
+    utter.rate = 0.95;
+    utter.onstart = () => setIsSpeaking(true);
+    utter.onend = () => setIsSpeaking(false);
+    utter.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utter);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis?.cancel();
+    setIsSpeaking(false);
+  };
+
+  // --- Speech-to-Text ---
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = selectedLang;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+    };
+    recognition.onerror = (event) => {
+      console.error(event.error);
+      setIsListening(false);
+    };
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
+  };
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -476,17 +537,19 @@ const FamilyDecision = () => {
     setMessages(prev => [...prev, { text: userMsg, sender: "user" }]);
     setInput('');
     setLoading(true);
+    stopSpeaking();
 
     try {
       const res = await api.post('/counselling/message', { 
         text: `[Context: You are speaking to concerned Indian parents about their child's vocational career. Be reassuring, factual, and address safety/social stigma.] ${userMsg}`, 
-        lang: 'en-IN' 
+        lang: selectedLang 
       });
-      if (res.data.reply && res.data.reply.includes('AI Error:')) {
-         setMessages(prev => [...prev, {text: "I am having trouble connecting. Vocational jobs are very safe today, please don't worry!", sender: "ai"}]);
-      } else {
-         setMessages(prev => [...prev, { text: res.data.reply, sender: "ai" }]);
+      let replyText = res.data.reply;
+      if (replyText && replyText.includes('AI Error:')) {
+         replyText = "I am having trouble connecting. Vocational jobs are very safe today, please don't worry!";
       }
+      setMessages(prev => [...prev, { text: replyText, sender: "ai" }]);
+      if (autoSpeak) speak(replyText);
     } catch (err) {
       console.error(err);
       setMessages(prev => [...prev, { text: "I am having trouble connecting right now. Please try again later.", sender: "ai" }]);
@@ -494,6 +557,8 @@ const FamilyDecision = () => {
       setLoading(false);
     }
   };
+
+  const currentLangLabel = LANGUAGES.find(l => l.code === selectedLang)?.label || 'English';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -546,12 +611,46 @@ const FamilyDecision = () => {
         </div>
 
         {/* Right: AI Chat for Parents */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col h-[500px]">
-          <div className="bg-indigo-600 text-white rounded-t-xl p-4 flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-full"><Bot className="w-5 h-5"/></div>
-            <div>
-              <h3 className="font-bold">Ask Disha AI (Parent Mode)</h3>
-              <p className="text-indigo-200 text-xs">Clear your doubts about your child's career</p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col h-[600px]">
+          <div className="bg-indigo-600 text-white rounded-t-xl p-3 flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-full"><Bot className="w-5 h-5"/></div>
+              <div>
+                <h3 className="font-bold">Ask Disha AI (Parent Mode)</h3>
+                <p className="text-indigo-200 text-xs">Clear your doubts about your child's career</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setAutoSpeak(v => !v)}
+                title={autoSpeak ? "Auto-speak ON" : "Auto-speak OFF"}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${autoSpeak ? 'bg-white text-indigo-700' : 'bg-indigo-700/50 text-white border-transparent hover:bg-indigo-700'}`}
+              >
+                🔊 {autoSpeak ? 'Speaker ON' : 'Speaker OFF'}
+              </button>
+
+              <div className="relative">
+                <button
+                  onClick={() => setShowLangMenu(v => !v)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-transparent bg-indigo-700/50 text-white hover:bg-indigo-700"
+                >
+                  🌐 {currentLangLabel.split(' ')[0]}
+                </button>
+                {showLangMenu && (
+                  <div className="absolute right-0 top-9 z-50 bg-white border border-gray-200 rounded-xl shadow-xl w-52 max-h-72 overflow-y-auto">
+                    {LANGUAGES.map(lang => (
+                      <button
+                        key={lang.code}
+                        onClick={() => { setSelectedLang(lang.code); setShowLangMenu(false); }}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-indigo-50 transition-colors ${selectedLang === lang.code ? 'text-indigo-700 font-semibold bg-indigo-50' : 'text-gray-700'}`}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
@@ -560,7 +659,17 @@ const FamilyDecision = () => {
               <div key={i} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {m.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 flex-shrink-0 mt-1"><Bot className="w-4 h-4 text-white"/></div>}
                 <div className={`max-w-[85%] rounded-2xl p-3 shadow-sm ${m.sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'}`}>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{m.text}</p>
+                  <div className={`text-sm leading-relaxed prose prose-sm ${m.sender === 'user' ? 'prose-invert' : 'prose-indigo'} max-w-none`}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                  </div>
+                  {m.sender === 'ai' && (
+                    <button
+                      onClick={() => isSpeaking ? stopSpeaking() : speak(m.text)}
+                      className="mt-2 text-xs text-indigo-500 hover:text-indigo-700 flex items-center gap-1"
+                    >
+                      {isSpeaking ? '⏹ Stop' : '🔊 Listen'}
+                    </button>
+                  )}
                 </div>
                 {m.sender === 'user' && <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center ml-2 flex-shrink-0 mt-1"><User className="w-4 h-4 text-gray-600"/></div>}
               </div>
@@ -584,10 +693,18 @@ const FamilyDecision = () => {
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                disabled={loading}
+                disabled={loading || isListening}
                 className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow text-sm"
-                placeholder="Ask your concern (e.g., Is welding safe?)"
+                placeholder={isListening ? `Listening in ${currentLangLabel.split(' ')[0]}...` : "Type or speak your concern (e.g., Is welding safe?)"}
               />
+              <button
+                type="button"
+                onClick={isListening ? stopListening : startListening}
+                title={isListening ? "Stop listening" : `Speak in ${currentLangLabel}`}
+                className={`p-2.5 rounded-lg transition-all flex-shrink-0 ${isListening ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+              >
+                🎙️
+              </button>
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
@@ -596,6 +713,7 @@ const FamilyDecision = () => {
                 <Send className="w-4 h-4"/>
               </button>
             </form>
+            <p className="text-[10px] text-gray-400 mt-1 text-center">🌐 Mic/Voice language: <strong>{currentLangLabel}</strong></p>
           </div>
         </div>
       </div>
