@@ -6,7 +6,7 @@ class OpenRouterProvider(AIProvider):
     def __init__(self):
         self.api_key = settings.OPENROUTER_API_KEY.strip() if settings.OPENROUTER_API_KEY else ""
         self.url = 'https://openrouter.ai/api/v1/chat/completions'
-        self.model = 'meta-llama/llama-3.1-8b-instruct:free'
+        self.model = 'mistralai/mistral-7b-instruct:free'  # confirmed free on OpenRouter
 
     def generate_response(self, prompt: str) -> str:
         if not self.api_key:
@@ -33,6 +33,7 @@ class OpenRouterProvider(AIProvider):
             'max_tokens': 512,
         }
         response = httpx.post(self.url, headers=headers, json=payload, timeout=10.0)
-        response.raise_for_status()
+        if not response.is_success:
+            raise Exception(f'OpenRouter API error {response.status_code}: {response.text[:200]}')
         data = response.json()
         return data['choices'][0]['message']['content']

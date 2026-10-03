@@ -6,7 +6,7 @@ class GroqProvider(AIProvider):
     def __init__(self):
         self.api_key = settings.GROQ_API_KEY.strip() if settings.GROQ_API_KEY else ""
         self.url = 'https://api.groq.com/openai/v1/chat/completions'
-        self.model = 'llama-3.3-70b-versatile'
+        self.model = 'llama3-8b-8192'  # stable, confirmed available on Groq free tier
 
     def generate_response(self, prompt: str) -> str:
         if not self.api_key:
@@ -32,6 +32,7 @@ class GroqProvider(AIProvider):
             'temperature': 0.7,
         }
         response = httpx.post(self.url, headers=headers, json=payload, timeout=10.0)
-        response.raise_for_status()
+        if not response.is_success:
+            raise Exception(f'Groq API error {response.status_code}: {response.text[:200]}')
         data = response.json()
         return data['choices'][0]['message']['content']
