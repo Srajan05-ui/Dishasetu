@@ -5,6 +5,8 @@ import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+const mdPlugins = [remarkGfm];
+
 const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL || 'https://dishasetu-backend.onrender.com/api' });
 
 // --- UI COMPONENTS ---
@@ -401,7 +403,7 @@ const AICounselling = () => {
             {m.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 flex-shrink-0 mt-1"><Bot className="w-4 h-4 text-white"/></div>}
             <div className={`max-w-[80%] rounded-2xl p-3 shadow-sm ${m.sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'}`}>
               <div className="text-[14px] leading-relaxed prose prose-sm prose-indigo max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={mdPlugins}>{m.text || ''}</ReactMarkdown>
               </div>
               {m.sender === 'ai' && (
                 <button
@@ -662,7 +664,7 @@ const FamilyDecision = () => {
                 {m.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 flex-shrink-0 mt-1"><Bot className="w-4 h-4 text-white"/></div>}
                 <div className={`max-w-[85%] rounded-2xl p-3 shadow-sm ${m.sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'}`}>
                   <div className={`text-sm leading-relaxed prose prose-sm ${m.sender === 'user' ? 'prose-invert' : 'prose-indigo'} max-w-none`}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={mdPlugins}>{m.text || ''}</ReactMarkdown>
                   </div>
                   {m.sender === 'ai' && (
                     <button
