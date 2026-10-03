@@ -36,3 +36,19 @@ class GroqProvider(AIProvider):
             raise Exception(f'Groq API error {response.status_code}: {response.text[:200]}')
         data = response.json()
         return data['choices'][0]['message']['content']
+
+    def generate_response_with_system(self, prompt: str, system: str) -> str:
+        if not self.api_key:
+            raise ValueError('Missing Groq API Key')
+        headers = {'Authorization': f'Bearer {self.api_key}', 'Content-Type': 'application/json'}
+        payload = {
+            'model': self.model,
+            'messages': [{'role': 'system', 'content': system}, {'role': 'user', 'content': prompt}],
+            'max_tokens': 512,
+            'temperature': 0.7,
+        }
+        response = httpx.post(self.url, headers=headers, json=payload, timeout=10.0)
+        if not response.is_success:
+            raise Exception(f'Groq API error {response.status_code}: {response.text[:200]}')
+        data = response.json()
+        return data['choices'][0]['message']['content']

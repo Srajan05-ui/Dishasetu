@@ -238,7 +238,7 @@ const AICounselling = () => {
     setLoading(true);
 
     try {
-      const res = await api.post('/counselling/message', { text: userMsg });
+      const res = await api.post('/counselling/message', { text: userMsg, lang: selectedLang });
       if (res.data.reply && res.data.reply.includes('AI Error:')) {
         const fallback = "I am currently operating in backup offline mode due to a server connection issue. I highly recommend checking out trades like Mechatronics Technician and Solar Panel Installer in our Career Explorer!";
         setMessages(prev => [...prev, {text: fallback, sender: "ai"}]);
