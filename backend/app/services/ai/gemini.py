@@ -5,7 +5,7 @@ from app.core.config import settings
 class GeminiProvider(AIProvider):
     def __init__(self):
         self.api_key = settings.GEMINI_API_KEY.strip() if settings.GEMINI_API_KEY else ""
-        self.url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.api_key}'
+        self.url = f'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key={self.api_key}'
 
     def generate_response(self, prompt: str) -> str:
         if not self.api_key:
